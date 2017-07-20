@@ -33,14 +33,6 @@ UKF::UKF() {
         0,0,0,1,0,
         0,0,0,0,1;
     
-  ///* predicted sigma points matrix
-  Xsig_pred_ = MatrixXd(5, 5);
-  Xsig_pred_ << 0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0;
-    
   ///* time when the state is true, in us
   time_us_ = 0.0;  
 
@@ -64,14 +56,6 @@ UKF::UKF() {
 
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
-    
-  //* Weights of sigma points
-  weights_ = VectorXd(5, 5);
-  Xsig_pred_ << 0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0,
-                0,0,0,0,0;
 
   ///* State dimension
   n_x_ = 5;
@@ -81,7 +65,17 @@ UKF::UKF() {
 
   ///* Sigma point spreading parameter
   lambda_ = 3;  
-
+    
+  //* Weights of sigma points  
+  VectorXd weights = VectorXd(2*n_aug_+1);
+    
+  ///* predicted sigma points matrix
+  MatrixXd Xsig_pred = MatrixXd(n_x_, 2 * n_aug_ + 1);
+  /*Xsig_pred_ << 0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0; */
   /**
   TODO:
 
