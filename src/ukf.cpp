@@ -11,6 +11,10 @@ using std::vector;
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
+    
+  ///* initially set to false, set to true in first call of ProcessMeasurement  
+  is_initialized_ = false;
+    
   // if this is false, laser measurements will be ignored (except during init)
   use_laser_ = true;
 
@@ -19,15 +23,32 @@ UKF::UKF() {
 
   // initial state vector
   x_ = VectorXd(5);
+  x_ << 0,0,0,0,0;
 
   // initial covariance matrix
   P_ = MatrixXd(5, 5);
+  P_ << 1,0,0,0,0,
+        0,1,0,0,0,
+        0,0,1,0,0,
+        0,0,0,1,0,
+        0,0,0,0,1;
+    
+  ///* predicted sigma points matrix
+  Xsig_pred_ = MatrixXd(5, 5);
+  Xsig_pred_ << 0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0;
+    
+  ///* time when the state is true, in us
+  time_us_ = 0.0;  
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 30;
+  std_a_ = 9;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 30;
+  std_yawdd_ = 15;
 
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -43,6 +64,23 @@ UKF::UKF() {
 
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
+    
+  //* Weights of sigma points
+  weights_ = VectorXd(5, 5);
+  Xsig_pred_ << 0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0,
+                0,0,0,0,0;
+
+  ///* State dimension
+  n_x_ = 5;
+
+  ///* Augmented state dimension
+  n_aug_ = 7;
+
+  ///* Sigma point spreading parameter
+  lambda_ = 3;  
 
   /**
   TODO:
