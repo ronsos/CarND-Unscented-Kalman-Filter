@@ -98,6 +98,69 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
+     /*****************************************************************************
+   *  Initialization
+   ****************************************************************************/
+  if (!is_initialized_) {
+    /**
+    TODO:
+      * Initialize the state ekf_.x_ with the first measurement.
+      * Create the covariance matrix.
+      * Remember: you'll need to convert radar from polar to cartesian coordinates.
+    */
+    // first measurement
+    cout << "UKF: " << endl;
+    //ekf_.x_ = VectorXd(4);
+    //ekf_.x_ << 0, 0, 0, 0;
+      
+    // Initialize timestamp  
+    time_us_ = meas_package.timestamp_;
+
+    if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+      /**
+      Convert radar from polar to cartesian coordinates and initialize state.
+      */
+        //cout << "INIT RADAR" << endl;
+        //cout << measurement_pack.raw_measurements_ << endl;
+        float rho, phi;
+        rho = meas_package.raw_measurements_[0];
+        phi = meas_package.raw_measurements_[1];
+        x_[0] = rho * cos(phi);
+        x_[1] = rho * sin(phi);
+        cout << "Radar" << endl;
+        cout << "x_ = " << x_ << endl;
+        cout << "P_ = " << P_ << endl;
+    }
+    else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
+      /**
+      Initialize state.
+      */
+        x_[0] = meas_package.raw_measurements_[0];
+        x_[1] = meas_package.raw_measurements_[1];
+        cout << "Laser" << endl;
+        cout << "x_ = " << x_ << endl;
+        cout << "P_ = " << P_ << endl;
+    }
+      
+
+    // done initializing, no need to predict or update
+    is_initialized_ = true;
+    return;
+  }
+   
+  //compute the time elapsed between the current and previous measurements
+  float dt = (meas_package.timestamp_ - time_us_) / 1000000.0; //dt-expressed in seconds
+  time_us_ = meas_package.timestamp_;  
+    
+  // TODO: Predict
+  Prediction(dt);
+    
+  // TODO: Update Radar or Lidar, alternate 
+  if (meas_package.sensor_type_ == MeasurementPackage::LASER) {  
+    UpdateLidar(meas_package);
+  } else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+    UpdateRadar(meas_package);   
+  }
     
 }
 
